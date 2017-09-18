@@ -14,10 +14,10 @@ using System.Threading;
 
 namespace DisplayService
 {
-    
+
     public partial class Service1 : ServiceBase
     {
-        
+
         public Service1()
         {
             InitializeComponent();
@@ -27,7 +27,7 @@ namespace DisplayService
         private string _url = ConfigurationManager.AppSettings["DisplayUrl"];
         private HubConnection _hubConnection = null;
         private IHubProxy _displayHubProxy = null;
-
+        private int retryCount = 0;
         public void InitialzeConnection()
         {
             if (_hubConnection != null)
@@ -36,15 +36,27 @@ namespace DisplayService
                 _hubConnection.Closed -= OnDisconnected;
             }
 
-            _hubConnection = new HubConnection(_url);
-            _hubConnection.Closed += OnDisconnected;
-            _displayHubProxy = _hubConnection.CreateHubProxy("DisplayHub");
+            if(retryCount < 6)
+            {
+                retryCount++;
+                _hubConnection = new HubConnection(_url);
+                _hubConnection.Closed += OnDisconnected;
+                _displayHubProxy = _hubConnection.CreateHubProxy("DisplayHub");
 
-            ConnectWithRetry();
+                ConnectWithRetry();
+
+            }
+            else
+            {
+                Stop();
+            }
+
         }
 
         public void OnDisconnected()
         {
+            Repository.logError("Hub connection error occured");
+            
             // Small delay before retrying connection
             Thread.Sleep(5000);
 
@@ -72,13 +84,7 @@ namespace DisplayService
 
 
             InitialzeConnection();
-            //string path = ConfigurationManager.AppSettings["Path"];
-            //var url = ConfigurationManager.AppSettings["DisplayUrl"];
 
-            //var connection = new HubConnection(url);
-            //var myhubproxy = connection.CreateHubProxy("DisplayHub");
-            //connection.Start();
-            //myhubproxy.Invoke("RefreshBrowser");
 
         }
 

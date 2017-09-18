@@ -53,6 +53,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Repository.cs" />
     <Compile Include="HubClient.cs" />
     <Compile Include="Monitor.cs" />
     <Compile Include="ProjectInstaller.cs">

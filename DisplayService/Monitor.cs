@@ -10,23 +10,24 @@ using System.Collections.Specialized;
 
 namespace DisplayService
 {
-    public  class Monitor
+    public class Monitor
     {
 
         private IHubProxy _hubproxy;
-        
+
         public Monitor(IHubProxy proxy)
         {
             _hubproxy = proxy;
         }
 
         string ticketContent = ConfigurationManager.AppSettings["TicketContent"];
+        string errorLog = ConfigurationManager.AppSettings["ErrorLog"];
 
         public void WatchFileSystem(string path)
         {
             FileSystemWatcher fileSystemWatcher = new FileSystemWatcher(path);
-            fileSystemWatcher.NotifyFilter = NotifyFilters.LastAccess;
-            fileSystemWatcher.Changed += FileSystemWatcher_Changed;   
+            fileSystemWatcher.NotifyFilter = NotifyFilters.Size;
+            fileSystemWatcher.Changed += FileSystemWatcher_Changed;
             fileSystemWatcher.EnableRaisingEvents = true;
         }
 
@@ -44,7 +45,7 @@ namespace DisplayService
             catch (Exception ex)
             {
 
-                File.WriteAllText(path, ex.ToString());
+                Repository.logError(ex.Message);
             }
 
         }
